@@ -13,8 +13,11 @@ RUN apt-get update && apt-get install -y \
 # Copy the application code into the container
 COPY main.py /app/main.py
 
-# Install required Python packages
-RUN pip install flask gitpython
+# Copy the requirements file into the container
+COPY requirements.txt /app/requirements.txt
+
+# Install required Python packages using the requirements file
+RUN pip install -r requirements.txt
 
 # Expose the port for webhook mode
 ENV WEBHOOK_PORT=5000

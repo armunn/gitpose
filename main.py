@@ -45,19 +45,21 @@ def process_deployments(repo_path):
     if not os.path.exists(target_path):
         raise FileNotFoundError(f"Target folder {target_path} does not exist.")
 
-    if DEPLOYMENT_HOSTNAME:
-        for subdir in os.listdir(target_path):
-            subdir_path = os.path.join(target_path, subdir)
-            if os.path.isdir(subdir_path):
-                os.chdir(subdir_path)
-                subprocess.run(["docker-compose", "down"], check=True)
-                subprocess.run(["docker-compose", "pull"], check=True)
-                subprocess.run(["docker-compose", "up", "-d", "--remove-orphans"], check=True)
-    else:
-        os.chdir(target_path)
-        subprocess.run(["docker-compose", "down"], check=True)
-        subprocess.run(["docker-compose", "pull"], check=True)
-        subprocess.run(["docker-compose", "up", "-d", "--remove-orphans"], check=True)
+    for subdir in sorted(os.listdir(target_path)):
+        subdir_path = os.path.join(target_path, subdir)
+        if os.path.isdir(subdir_path):
+            os.chdir(subdir_path)
+            if os.path.exists("docker-compose.yml"):
+                with open("docker-compose.yml", "r") as f:
+                    contents = f.read()
+                    if "# GP:Disable" in contents:
+                        subprocess.run(["docker-compose", "down"], check=True)
+
+                    if "# GP: AlwaysPull" in contents:
+                        subprocess.run(["docker-compose", "pull"], check=True)
+
+            subprocess.run(["docker-compose", "up", "-d", "--remove-orphans"], check=True)
+
 
 # Run once mode
 def run_once():
