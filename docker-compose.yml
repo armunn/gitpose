@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  gitpose:
+    build: .
+    container_name: gitpose_tool
+    environment:
+      - GIT_REPO=${GIT_REPO}
+      - DEPLOYMENT_HOSTNAME=${HOSTNAME}
+      - MODE=${MODE}
+      - PRIVATE_KEY_PATH=/gitpose/.ssh/id_rsa
+      - POLL_INTERVAL=${POLL_INTERVAL}
+      - WEBHOOK_PORT=${WEBHOOK_PORT}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.ssh/id_rsa:/gitpose/.ssh/id_rsa:ro
+      - gitpose_repo:/gitpose/repo
+    ports:
+      - "${WEBHOOK_PORT}:${WEBHOOK_PORT}"
+
+volumes:
+  gitpose_repo:
